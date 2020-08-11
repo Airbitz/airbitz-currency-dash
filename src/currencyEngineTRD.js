@@ -880,6 +880,30 @@ export class ShitcoinEngine {
     return (idx !== -1)
   }
 
+  async getPaymentProtocolInfo(url: string) {
+
+    let response = await io.fetch(url, {
+      headers: {
+        'Accept': 'application/payment-request',
+        'x-currency': 'DASH'
+      }
+    })
+
+    let body = await response.json()
+
+    return {
+      memo: body.memo,
+      nativeAmount: body.outputs.reduce((sum, o) => { return sum + o.amount }, 0).toString(),
+      spendTargets: body.outputs.map(output => {
+        return {
+          nativeAmount: output.amount.toString(),
+          publicAddress: output.address
+        }
+      })
+    }
+
+  }
+
   // asynchronous
   async makeSpend (abcSpendInfo:any) {
     // returns an ABCTransaction data structure, and checks for valid info
